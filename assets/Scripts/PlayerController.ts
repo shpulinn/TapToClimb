@@ -1,4 +1,4 @@
-import { _decorator, Component, RigidBody2D, input, Input, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType } from 'cc';
+import { _decorator, Component, RigidBody2D, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType, director, Director, Collider2D } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlayerController')
@@ -16,18 +16,24 @@ export class PlayerController extends Component {
     private isGrounded: boolean = false;
     private defaultParent: Node = null;
     private playerVisual: Node = null;
+    private collider: Collider2D = null;
 
     onLoad() {
         this.defaultParent = this.node.parent;
         this.playerVisual = this.node.getChildByName("Visual");
 
-        input.on(Input.EventType.TOUCH_START, this.jump, this);
-        input.on(Input.EventType.TOUCH_MOVE, this.move, this);
-        input.on(Input.EventType.TOUCH_END, this.stopMove, this);
+        this.collider = this.getComponent(BoxCollider2D);
+        this.collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+        this.collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
 
-        const collider = this.getComponent(BoxCollider2D);
-        collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
-        collider.on(Contact2DType.END_CONTACT, this.onEndContact, this);
+        this.node.on('moveInput', this.onMoveInput, this);
+    }
+
+    onMoveInput(direction: number) {
+        if (direction !== this.moveDirection) {
+            this.moveDirection = direction;
+            this.playerVisual.scale = new Vec3(direction > 0 ? 1 : (direction < 0 ? -1 : this.playerVisual.scale.x), 1, 1);
+        }
     }
 
     jump(event: EventTouch) {
@@ -38,14 +44,6 @@ export class PlayerController extends Component {
         }
     }
 
-    move(event: EventTouch) {
-        const touchX = event.getLocationX();
-        const screenWidth = 720; // Разрешение экрана
-        this.moveDirection = touchX < screenWidth / 2 ? -1 : 1;
-        let scale = this.moveDirection > 0 ? new Vec3(1,1,1) : new Vec3(-1,1,1);
-        this.playerVisual.scale = scale;
-    }
-
     stopMove() {
         this.moveDirection = 0;
     }
@@ -54,15 +52,18 @@ export class PlayerController extends Component {
         if (otherCollider.node.name === 'Platform') {
             const playerPos = this.node.getPosition();
             const platformPos = otherCollider.node.getPosition();
-            if (playerPos.y > platformPos.y) {
+            
+            if (playerPos.y > platformPos.y && this.rigidBody.linearVelocity.y <= 0) {
                 this.isGrounded = true;
-                this.node.setParent(otherCollider.node);
+                director.once(Director.EVENT_AFTER_PHYSICS, this.jump, this);
             }
         }
+        
         if (otherCollider.node.name === 'Spike') {
             this.node.emit('playerDied');
         }
     }
+
 
     onEndContact(selfCollider: any, otherCollider: any) {
         if (otherCollider.node.name === 'Platform') {
@@ -72,6 +73,12 @@ export class PlayerController extends Component {
     }
 
     update(deltaTime: number) {      
+        if(this.rigidBody.linearVelocity.y >= 0) {
+            this.collider.sensor = true;
+        } else {
+            this.collider.sensor = false;
+        }
+
         if (this.moveDirection !== 0) {
             const velocity = this.rigidBody.linearVelocity;
             velocity.x = this.moveDirection * this.moveSpeed;
@@ -81,24 +88,5 @@ export class PlayerController extends Component {
         if (this.node.getPosition().y < -800) {
             this.node.emit('playerDied');
         }
-    }
-
-    onCollisionEnter2D(other: any, self: any, contact: any) {  
-        if (other.node.name === 'Platform') {             
-            const velocity = this.rigidBody.linearVelocity;
-            if (velocity.y > 0) {
-                // Игрок движется вверх → игнорируем столкновение
-                contact.disabled = true;
-            }
-        }
-        if (other.node.name === 'Spike') {
-            this.node.emit('playerDied');
-        }
-    }
-
-    onDestroy() {
-        input.off(Input.EventType.TOUCH_START, this.jump, this);
-        input.off(Input.EventType.TOUCH_MOVE, this.move, this);
-        input.off(Input.EventType.TOUCH_END, this.stopMove, this);
     }
 }
