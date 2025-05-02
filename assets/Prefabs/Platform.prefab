@@ -101,7 +101,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -60,
+      "x": -59,
       "y": 9.729,
       "z": 0
     },
@@ -210,8 +210,6 @@
       "__id__": 0
     },
     "fileId": "e6O3o1vehJKrzG4k7KfYSy",
-    "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -237,7 +235,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 60,
+      "x": 59,
       "y": 9.729,
       "z": 0
     },
@@ -639,7 +637,7 @@
     "__prefab": {
       "__id__": 29
     },
-    "speed": 100,
+    "speed": 80,
     "_id": ""
   },
   {
