@@ -1,4 +1,4 @@
-import { _decorator, Component, RigidBody2D, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType, director, Director, Collider2D } from 'cc';
+import { _decorator, Component, RigidBody2D, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType, director, Director, Collider2D, CCFloat } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlayerController')
@@ -6,10 +6,10 @@ export class PlayerController extends Component {
     @property(RigidBody2D)
     private rigidBody: RigidBody2D = null;
 
-    @property(Number)
+    @property(CCFloat)
     private jumpForce: number = 500;
 
-    @property(Number)
+    @property(CCFloat)
     private moveSpeed: number = 200;
 
     private moveDirection: number = 0;
@@ -50,8 +50,8 @@ export class PlayerController extends Component {
 
     onBeginContact(selfCollider: any, otherCollider: any) {
         if (otherCollider.node.name === 'Platform') {
-            const playerPos = this.node.getPosition();
-            const platformPos = otherCollider.node.getPosition();
+            const playerPos = this.node.position;
+            const platformPos = otherCollider.node.position;
             
             if (playerPos.y > platformPos.y && this.rigidBody.linearVelocity.y <= 0) {
                 this.isGrounded = true;
@@ -85,7 +85,11 @@ export class PlayerController extends Component {
             this.rigidBody.linearVelocity = velocity;
         }
 
-        if (this.node.getPosition().y < -800) {
+        if (this.node.position.y > 600) {
+            this.node.setPosition(new Vec3(this.node.position.x, 600, this.node.position.z));
+        }
+
+        if (this.node.y < -800) {
             this.node.emit('playerDied');
         }
     }
