@@ -1,21 +1,22 @@
-import { _decorator, Component, Prefab, instantiate, Node, Vec3, randomRange } from 'cc';
+import { _decorator, Component, Prefab, instantiate, Vec3, randomRange, CCInteger, CCFloat } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlatformGenerator')
 export class PlatformGenerator extends Component {
+
     @property(Prefab)
     private platformPrefab: Prefab = null;
 
-    @property(Number)
+    @property(CCInteger)
     private spawnInterval: number = 2;
 
-    @property(Number)
+    @property(CCFloat)
     private minX: number = -300;
 
-    @property(Number)
+    @property(CCFloat)
     private maxX: number = 300;
 
-    @property(Number)
+    @property(CCFloat)
     private spawnY: number = 800;
 
     private timer: number = 0;
