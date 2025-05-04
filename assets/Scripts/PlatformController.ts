@@ -1,9 +1,9 @@
-import { _decorator, Component, Node, Vec3 } from 'cc';
+import { _decorator, Component, CCFloat} from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlatformController')
 export class PlatformController extends Component {
-    @property(Number)
+    @property(CCFloat)
     private speed: number = 100;
 
     update(deltaTime: number) {
