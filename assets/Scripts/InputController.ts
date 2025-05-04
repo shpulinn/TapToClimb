@@ -33,7 +33,7 @@ export class InputController extends Component {
         this.node.emit('moveInput', this.moveDirection);
     }
 
-    onDestroy() {
+    onDisable(): void {
         this.leftButton.node.off(Input.EventType.TOUCH_START, this.startMoveLeft, this);
         this.leftButton.node.off(Input.EventType.TOUCH_END, this.stopMove, this);
         this.rightButton.node.off(Input.EventType.TOUCH_START, this.startMoveRight, this);
