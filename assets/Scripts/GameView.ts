@@ -1,4 +1,4 @@
-import { _decorator, Component, director, Label, Node } from 'cc';
+import { _decorator, Component, director, Label, Node, tween, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameView')
@@ -13,7 +13,16 @@ export class GameView extends Component {
     private gameOverScoreLabel: Label = null;
 
     public updateScore(score: number) {
-        this.scoreLabel.string = `Score: ${score}`;
+        this.scoreLabel.string = `SCORE: ${score}`;
+        tween()
+            .target(this.scoreLabel.node)
+            .to(.2, {
+                scale: new Vec3(1.1, 1.1, 1),
+            })
+            .to(.2, {
+                scale: new Vec3(1, 1, 1),
+            })
+            .start();
     }
 
     public loadMenu() {
