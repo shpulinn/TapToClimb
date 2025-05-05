@@ -7,6 +7,12 @@ export class PlatformGenerator extends Component {
     @property(Prefab)
     private platformPrefab: Prefab = null;
 
+    @property(Prefab)
+    private coinPlatformPrefab: Prefab = null;
+
+    @property(CCFloat)
+    private coinPlatformSpawnChance: number = 0.25;
+
     @property(CCInteger)
     private spawnInterval: number = 2;
 
@@ -30,7 +36,9 @@ export class PlatformGenerator extends Component {
     }
 
     spawnPlatform() {
-        const platform = instantiate(this.platformPrefab);
+        const random = Math.random();
+        const prefab = random > this.coinPlatformSpawnChance ? this.platformPrefab : this.coinPlatformPrefab;
+        const platform = instantiate(prefab);
         platform.setParent(this.node);
         const x = randomRange(this.minX, this.maxX);
         platform.setPosition(new Vec3(x, this.spawnY, 0));
