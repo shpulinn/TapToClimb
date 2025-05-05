@@ -8,16 +8,26 @@ export class SoundsController extends Component {
     @property([AudioClip])
     private playerFootstepsAudioClips: AudioClip[] = [];
 
+    @property(AudioClip)
+    private coinCollctedAudioClip: AudioClip = null;
+
     private audioSource: AudioSource = null;
 
     start() {
         this.audioSource = this.getComponent(AudioSource);
 
         this.node.on('playerJumped', this.onPlayerJumped, this);
+        this.node.on('coinCollected', this.onCoinCollected, this);
     }
 
     onPlayerJumped() {
         this.playRandomSound();
+    }
+
+    onCoinCollected() {
+        this.audioSource.clip = this.coinCollctedAudioClip;
+
+        this.audioSource.play();
     }
 
     playRandomSound() {
