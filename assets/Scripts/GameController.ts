@@ -1,4 +1,4 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node} from 'cc';
 import { GameModel } from './GameModel';
 import { GameView } from './GameView';
 const { ccclass, property } = _decorator;
@@ -23,7 +23,15 @@ export class GameController extends Component {
     onLoad() {
         this.player.on('playerJumped', this.onPlayerJumped, this);
         this.player.on('playerDied', this.onPlayerDied, this);
+        this.player.on('coinCollected', this.onCoinCollected, this);
         this.switchState(GameState.Playing);
+    }
+
+    private onCoinCollected() {
+        if (this.currentState === GameState.Playing) {
+            this.model.addScore(10);            
+            this.view.updateScore(this.model.getScore());
+        }
     }
 
     private onPlayerJumped() {
