@@ -1,4 +1,4 @@
-import { _decorator, Component, RigidBody2D, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType, director, Director, Collider2D, CCFloat } from 'cc';
+import { _decorator, Component, RigidBody2D, EventTouch, Vec2, Node, Vec3, BoxCollider2D, Contact2DType, director, Director, Collider2D, CCFloat, instantiate, Prefab } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('PlayerController')
@@ -11,6 +11,9 @@ export class PlayerController extends Component {
 
     @property(CCFloat)
     private moveSpeed: number = 200;
+    
+    @property(Prefab)
+    private jumpParticle: Prefab = null;
 
     private moveDirection: number = 0;
     private isGrounded: boolean = false;
@@ -37,7 +40,7 @@ export class PlayerController extends Component {
     }
 
     jump(event: EventTouch) {
-        if (this.isGrounded) {
+        if (this.isGrounded) {            
             this.rigidBody.applyForceToCenter(new Vec2(0, this.jumpForce), true);
             this.node.emit('playerJumped');
             this.isGrounded = false;
@@ -49,24 +52,34 @@ export class PlayerController extends Component {
     }
 
     onBeginContact(selfCollider: any, otherCollider: any) {
-        if (otherCollider.node.name === 'Platform') {
+        if (otherCollider.node.getComponent(Collider2D).tag === 2) {
+            this.node.emit('coinCollected');
+            otherCollider.node.destroy();
+        }
+
+        if (otherCollider.node.getComponent(Collider2D).tag === 1) {
             const playerPos = this.node.position;
             const platformPos = otherCollider.node.position;
             
             if (playerPos.y > platformPos.y && this.rigidBody.linearVelocity.y <= 0) {
                 this.isGrounded = true;
+                const particle = instantiate(this.jumpParticle);
+                particle.setParent(this.node.parent);
+                const playerCollider = this.node.getComponent(BoxCollider2D);
+                const playerHeight = playerCollider.size.y;
+                const particlePos = new Vec3(
+                    this.node.position.x,
+                    this.node.position.y - playerHeight / 2,
+                    0
+                );
+                particle.setPosition(particlePos);
                 director.once(Director.EVENT_AFTER_PHYSICS, this.jump, this);
             }
         }
-        
-        if (otherCollider.node.name === 'Spike') {
-            this.node.emit('playerDied');
-        }
     }
 
-
     onEndContact(selfCollider: any, otherCollider: any) {
-        if (otherCollider.node.name === 'Platform') {
+        if (otherCollider.node.getComponent(Collider2D).tag === 1) {
             this.isGrounded = false;
             this.node.setParent(this.defaultParent);
         }
